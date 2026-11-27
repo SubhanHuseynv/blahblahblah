@@ -1,0 +1,38 @@
+# Lokal mühit: docker compose up -d --build
+#   API      → http://localhost:5000  (frontend .env ilə eyni port)
+#   Postgres → localhost:5432         (pgAdmin / DBeaver ilə qoşulmaq və ya "dotnet run" üçün)
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: todo-db
+    environment:
+      POSTGRES_DB: tododb
+      POSTGRES_USER: todo
+      POSTGRES_PASSWORD: todo_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - todo-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U todo -d tododb"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend/TodoApp.API
+    image: todo-api:local
+    container_name: todo-api
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:8080"
+    environment:
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=tododb;Username=todo;Password=todo_dev_password"
+      Cors__AllowedOrigins__0: "http://localhost:5173"
+      Swagger__Enabled: "true"
+
+volumes:
+  todo-pgdata:

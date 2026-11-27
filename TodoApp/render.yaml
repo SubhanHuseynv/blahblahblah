@@ -1,0 +1,27 @@
+# Render Blueprint: Render dashboard → New → Blueprint → bu repo seçilir
+databases:
+  - name: todo-db
+    plan: free
+    databaseName: tododb
+    user: todo
+
+services:
+  - type: web
+    name: todo-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/TodoApp.API/Dockerfile
+    dockerContext: ./backend/TodoApp.API
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Render-in Postgres bağlantısı avtomatik ötürülür (postgres://... formatı, kodda çevrilir)
+      - key: ConnectionStrings__Default
+        fromDatabase:
+          name: todo-db
+          property: connectionString
+      # Frontend-in production ünvanı (məs. https://todo-app.vercel.app) — dashboard-da daxil edilir
+      - key: Cors__AllowedOrigins__0
+        sync: false
+      - key: Swagger__Enabled
+        value: "true"
