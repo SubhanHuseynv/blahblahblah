@@ -1,6 +1,8 @@
 # Lokal mühit: docker compose up -d --build
 #   API      → http://localhost:5000  (frontend .env ilə eyni port)
 #   Postgres → localhost:5432         (pgAdmin / DBeaver ilə qoşulmaq və ya "dotnet run" üçün)
+name: todoapp
+
 services:
   db:
     image: postgres:16-alpine
